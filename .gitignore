@@ -1,9 +1,37 @@
+# Dependencies
 node_modules
+
+# Build output
 dist
 dist-ssr
 *.local
-.DS_Store
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Caches / build info
 .vite
 *.tsbuildinfo
+
+# Editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.sw?
+.DS_Store
+
+# Deploy
 .vercel
+
+# Local test fixtures (not needed in the repo)
 test-images
