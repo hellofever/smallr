@@ -11,6 +11,23 @@ const crossOriginIsolation = {
   'Cross-Origin-Embedder-Policy': 'require-corp',
 };
 
+// Full production security headers — kept in sync with vercel.json. Applied to
+// the `preview` server (which serves the built app) so `npm run preview` mirrors
+// production and can validate the CSP in a browser before deploying. The CSP
+// hash matches the inline theme script in index.html; regenerate it if that
+// script changes (openssl sha256 -binary | base64 over the script contents).
+const prodHeaders = {
+  ...crossOriginIsolation,
+  'Cross-Origin-Resource-Policy': 'same-origin',
+  'Content-Security-Policy':
+    "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'none'; script-src 'self' 'wasm-unsafe-eval' 'sha256-vSHw6D2jJ1dga7AO3IHkhzGbjiskfQUPNL3lVXFcNFk='; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self' blob:; worker-src 'self' blob:; font-src 'self'; manifest-src 'self'",
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'no-referrer',
+  'X-Frame-Options': 'DENY',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), usb=(), payment=(), browsing-topics=()',
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+};
+
 // jSquash ships ESM + WASM bundles. They must be excluded from Vite's dep
 // pre-bundling so the .wasm binaries resolve and load lazily at runtime.
 export default defineConfig({
@@ -22,5 +39,5 @@ export default defineConfig({
     format: 'es',
   },
   server: { headers: crossOriginIsolation },
-  preview: { headers: crossOriginIsolation },
+  preview: { headers: prodHeaders },
 });
