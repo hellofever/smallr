@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { EncodeSettings, OutputFormat, PngPreset } from '../core/types';
 import { DEFAULT_SETTINGS } from '../core/types';
-import { FORMAT_META, mimeToFormat, renameWithExt } from '../core/format';
+import { mimeToFormat, renameWithExt } from '../core/format';
 
 export type ItemStatus = 'queued' | 'processing' | 'done' | 'error';
 
@@ -274,8 +274,4 @@ export function selectFlow(state: QueueState): Flow {
     originalTotal,
     outputTotal,
   };
-}
-
-export function formatMeta(format: OutputFormat) {
-  return FORMAT_META[format];
 }

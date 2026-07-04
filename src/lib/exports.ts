@@ -44,11 +44,15 @@ export interface ZipEntry {
 
 /** Bundle finished outputs into a ZIP and trigger a download. */
 export async function downloadZip(entries: ZipEntry[], filename = 'smallr.zip'): Promise<void> {
+  // Read every output blob in parallel — they're independent local reads.
+  const buffers = await Promise.all(
+    entries.map((e) => fetch(e.url).then((r) => r.arrayBuffer())),
+  );
+
   const used = new Map<string, number>();
   const files: Record<string, [Uint8Array, { level: 0 }]> = {};
 
-  for (const entry of entries) {
-    const buf = new Uint8Array(await (await fetch(entry.url)).arrayBuffer());
+  entries.forEach((entry, i) => {
     // Avoid collisions when several outputs share a name.
     let name = entry.name;
     const seen = used.get(name);
@@ -62,17 +66,14 @@ export async function downloadZip(entries: ZipEntry[], filename = 'smallr.zip'):
       used.set(entry.name, 0);
     }
     // Store (level 0) — images are already compressed, so don't re-deflate.
-    files[name] = [buf, { level: 0 }];
-  }
+    files[name] = [new Uint8Array(buffers[i]), { level: 0 }];
+  });
 
   const zipped = await new Promise<Uint8Array>((resolve, reject) => {
     zip(files, (err, data) => (err ? reject(err) : resolve(data)));
   });
 
   const url = URL.createObjectURL(new Blob([zipped as BlobPart], { type: 'application/zip' }));
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
+  triggerDownload(url, filename);
   URL.revokeObjectURL(url);
 }

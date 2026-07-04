@@ -1,5 +1,5 @@
 import { useQueueRunner } from './hooks/useQueueRunner';
-import { useQueueStore, selectFlow } from './state/queueStore';
+import { useQueueStore } from './state/queueStore';
 import { Composer } from './components/Composer';
 import { ProgressBar } from './components/ProgressBar';
 import { QueueList } from './components/QueueList';
@@ -32,8 +32,8 @@ const LIBRARIES: { name: string; text: string }[] = [
 
 export default function App() {
   useQueueRunner(); // owns the worker + drains the queue
-  const phase = useQueueStore((s) => selectFlow(s).phase);
-  const idle = phase === 'idle';
+  // Marketing blades show only on the initial screen (no images queued yet).
+  const idle = useQueueStore((s) => s.items.length === 0);
 
   return (
     <div className="flex min-h-full flex-col">
