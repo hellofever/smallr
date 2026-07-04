@@ -6,9 +6,9 @@ import type { OutputFormat, PngPreset } from '../core/types';
 const FORMATS: OutputFormat[] = ['png', 'webp', 'jpeg'];
 
 const PNG_PRESETS: { value: PngPreset; label: string; caption: string }[] = [
-  { value: 'lossless', label: 'Lossless', caption: 'No quality loss. Larger files.' },
-  { value: 'high', label: 'High', caption: 'Recommended. Near-lossless, much smaller than lossless.' },
-  { value: 'medium', label: 'Medium', caption: 'Smaller. Slight colour reduction.' },
+  { value: 'lossless', label: 'Lossless', caption: 'No quality loss. Largest files.' },
+  { value: 'high', label: 'High', caption: 'Recommended. No quality loss, well compressed.' },
+  { value: 'medium', label: 'Medium', caption: 'Near-lossless. Much smaller.' },
   { value: 'low', label: 'Low', caption: 'Smallest. May band on gradients.' },
 ];
 

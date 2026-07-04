@@ -7,21 +7,19 @@
 import type { EncodeResult, EncodeSettings, OutputFormat, PngPreset } from './types';
 import { FORMAT_META } from './format';
 
-/** PNG preset → palette colour count (UPNG `cnum`). 0 = truecolour lossless. */
-const PNG_PRESET_COLORS: Record<PngPreset, number> = {
-  lossless: 0,
-  high: 256,
-  medium: 128,
-  low: 64,
-};
-
 /**
- * Oxipng optimisation level applied to every PNG. Profiling showed the higher
- * levels cost seconds (their trials aren't cheap even multithreaded) for well
- * under a percent of extra size — level 1 captures the bulk of the win at a
- * fraction of the time, on both the lossless and lossy paths.
+ * PNG preset config — two independent levers:
+ *   • `cnum`   UPNG palette colour count. 0 = truecolour (lossless); >0 = lossy
+ *              quantisation to that many colours. This is the *quality* lever.
+ *   • `oxipng` oxipng effort level (0–6), or `false` to skip. Lossless size/speed
+ *              lever only — never changes pixels. Higher = smaller but slower.
  */
-const OXIPNG_LEVEL = 1;
+const PNG_PRESETS: Record<PngPreset, { cnum: number; oxipng: number | false }> = {
+  lossless: { cnum: 0, oxipng: 0 }, // truecolour, minimal lossless squeeze
+  high: { cnum: 0, oxipng: 1 }, // truecolour, light lossless squeeze
+  medium: { cnum: 256, oxipng: 3 }, // near-lossless palette
+  low: { cnum: 64, oxipng: 3 }, // smallest, may band
+};
 
 type ProgressFn = (value: number) => void;
 
@@ -61,26 +59,21 @@ async function encodePng(
   settings: EncodeSettings,
   onProgress: ProgressFn,
 ): Promise<Uint8Array> {
-  // 0 = truecolour (lossless); >0 quantises to that many palette colours.
-  const cnum = PNG_PRESET_COLORS[settings.pngPreset];
-  const { optimise } = await import('@jsquash/oxipng');
+  const { cnum, oxipng } = PNG_PRESETS[settings.pngPreset];
 
-  if (cnum === 0) {
-    // Lossless: oxipng encodes + optimises straight from the pixels in a single
-    // WASM pass — no separate (pure-JS) UPNG deflate needed.
-    onProgress(0.6);
-    const optimised = await optimise(image, { level: OXIPNG_LEVEL });
-    return new Uint8Array(optimised);
-  }
-
-  // Lossy: UPNG quantises the palette (this is the lossy step), then oxipng
-  // squeezes the resulting container.
+  // UPNG encodes the pixels: cnum=0 → truecolour lossless, cnum>0 → the palette
+  // quantisation (the lossy step). This runs on every path.
   const UPNG = (await import('upng-js')).default;
   onProgress(0.55);
   const rgba = new Uint8Array(image.data.buffer.slice(0)).buffer;
   const png = UPNG.encode([rgba], image.width, image.height, cnum);
+
+  // oxipng then losslessly squeezes the container (smaller, same pixels). Skip
+  // it when the preset opts out (oxipng === false).
+  if (oxipng === false) return new Uint8Array(png);
   onProgress(0.75);
-  const optimised = await optimise(png, { level: OXIPNG_LEVEL });
+  const { optimise } = await import('@jsquash/oxipng');
+  const optimised = await optimise(png, { level: oxipng });
   return new Uint8Array(optimised);
 }
 
