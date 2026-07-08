@@ -68,7 +68,7 @@ export function Dropzone() {
       </div>
       <div>
         <p className="font-medium text-[var(--text)]">
-          Drop images here, or <span className="text-[var(--accent)]">browse</span>
+          Drop images here, <span className="text-[var(--accent)]">browse</span>, or paste
         </p>
         <p className="mt-1 text-sm text-[var(--muted)]">PNG · JPEG · WebP · GIF</p>
       </div>

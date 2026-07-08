@@ -1,4 +1,5 @@
 import { useQueueRunner } from './hooks/useQueueRunner';
+import { usePasteImages } from './hooks/usePasteImages';
 import { useQueueStore } from './state/queueStore';
 import { Composer } from './components/Composer';
 import { ProgressBar } from './components/ProgressBar';
@@ -32,6 +33,7 @@ const LIBRARIES: { name: string; text: string }[] = [
 
 export default function App() {
   useQueueRunner(); // owns the worker + drains the queue
+  usePasteImages(); // Cmd/Ctrl+V anywhere adds images to the queue
   // Marketing blades show only on the initial screen (no images queued yet).
   const idle = useQueueStore((s) => s.items.length === 0);
 
