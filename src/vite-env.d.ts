@@ -1,5 +1,4 @@
 /// <reference types="vite/client" />
-/// <reference types="vite-plugin-pwa/client" />
 
 // upng-js ships no types. Minimal declarations for what we use.
 declare module 'upng-js' {
