@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
 // Cross-origin isolation headers. These enable SharedArrayBuffer, which lets
 // the oxipng WASM codec run multithreaded (otherwise it falls back to a single
@@ -31,7 +32,42 @@ const prodHeaders = {
 // jSquash ships ESM + WASM bundles. They must be excluded from Vite's dep
 // pre-bundling so the .wasm binaries resolve and load lazily at runtime.
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    // Offline mode: precaches the app shell + every lazy-loaded codec chunk
+    // (including the WASM binaries) so smallr loads and fully works with no
+    // network at all, not just during processing. Silent auto-update: a new
+    // deploy takes over in the background and applies on next reload, no
+    // "update available" UI needed.
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon-48.png', 'apple-touch-icon.png'],
+      manifest: {
+        name: 'smallr — local image compressor',
+        short_name: 'smallr',
+        description: 'Fast, 100% local image compressor & converter (PNG / WebP / JPEG).',
+        theme_color: '#0077b6',
+        background_color: '#f7f7f8',
+        display: 'standalone',
+        start_url: '/',
+        icons: [
+          { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+          {
+            src: '/icon-maskable-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+        ],
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,wasm,png}'],
+        navigateFallback: '/index.html',
+      },
+    }),
+  ],
   optimizeDeps: {
     exclude: ['@jsquash/jpeg', '@jsquash/webp', '@jsquash/oxipng'],
   },

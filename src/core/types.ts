@@ -53,12 +53,25 @@ export interface EncodeResult {
 // ── Worker message protocol (typed both directions) ─────────────────────────
 
 export interface EncodeRequest {
+  type: 'encode';
   id: string;
   /** Raw source file bytes. Transferred, not copied. */
   buffer: ArrayBuffer;
   sourceType: string;
   settings: EncodeSettings;
 }
+
+/**
+ * Ask an idle worker to lazy-load and initialise a format's WASM codec ahead
+ * of time (fire-and-forget, no response). Sent whenever a format becomes
+ * active, so the real first encode isn't slowed down by a cold module load.
+ */
+export interface WarmRequest {
+  type: 'warm';
+  format: OutputFormat;
+}
+
+export type WorkerRequest = EncodeRequest | WarmRequest;
 
 export type WorkerResponse =
   | { id: string; type: 'progress'; value: number }

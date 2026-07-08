@@ -1,13 +1,20 @@
-// Compression worker: receives an EncodeRequest, runs the (heavy) encode
-// pipeline off the main thread, and streams progress + the result back.
-import { encodeImage } from '../core/encode';
-import type { EncodeRequest, WorkerResponse } from '../core/types';
+// Compression worker: runs the (heavy) encode pipeline off the main thread,
+// streaming progress + the result back. Also handles 'warm' requests that
+// pre-load a format's WASM codec ahead of the first real encode.
+import { encodeImage, warmEncoder } from '../core/encode';
+import type { WorkerRequest, WorkerResponse } from '../core/types';
 
 function post(msg: WorkerResponse, transfer?: Transferable[]) {
   (self as unknown as Worker).postMessage(msg, transfer ?? []);
 }
 
-self.onmessage = async (e: MessageEvent<EncodeRequest>) => {
+self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
+  if (e.data.type === 'warm') {
+    // Fire-and-forget: best-effort cache warm, nothing to report either way.
+    warmEncoder(e.data.format).catch(() => {});
+    return;
+  }
+
   const { id, buffer, sourceType, settings } = e.data;
   try {
     const result = await encodeImage(buffer, sourceType, settings, (value) => {

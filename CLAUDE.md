@@ -86,6 +86,24 @@ src/
 - Theme is set on `<html data-theme>` (initial value applied inline in `index.html` to avoid FOUC).
 - Keep it minimal: one accent, subtle borders, generous whitespace, no heavy shadows.
 
+## Offline mode (PWA)
+
+- `vite-plugin-pwa` (Workbox `generateSW` mode, `registerType: 'autoUpdate'`) precaches the app
+  shell plus every lazy-loaded codec chunk (including the WASM binaries) so the app loads and
+  fully works with **no network at all**, not just during processing. Registered once in
+  `main.tsx` via `registerSW({ immediate: true })` (virtual module, no inline `<script>` — keeps
+  the CSP's pinned script hash untouched).
+- Updates are silent: a new deploy's service worker activates in the background and takes over
+  on the next reload. No "update available" prompt UI by design.
+- `public/icon-*.png`, `apple-touch-icon.png`, `favicon-48.png` are **placeholder** icons
+  (a simple generated "shrinking square" mark on brand blue) — swap for real artwork whenever
+  it exists; nothing else needs to change since the manifest just points at these paths.
+- `vite.config.ts`'s `workbox.globPatterns` must keep matching every asset type that ships
+  (`js`, `css`, `html`, `wasm`, `png`) — if a new asset type is added to the build, extend the
+  pattern or it silently won't be precached for offline use.
+- Relies on the existing CSP's `worker-src 'self' blob:'` and `manifest-src 'self'` (already
+  present in `vite.config.ts`'s `prodHeaders` and `vercel.json`) — no CSP changes were needed.
+
 ## Roadmap / good next steps
 
 - AVIF / JPEG XL (`@jsquash/avif`, `@jsquash/jxl`) — same pattern in `core/encode.ts`.

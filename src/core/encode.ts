@@ -77,8 +77,16 @@ async function encodePng(
   return new Uint8Array(optimised);
 }
 
-async function encodeWebp(image: ImageData, settings: EncodeSettings): Promise<Uint8Array> {
+async function encodeWebp(
+  image: ImageData,
+  settings: EncodeSettings,
+  onProgress: ProgressFn,
+): Promise<Uint8Array> {
   const { encode } = await import('@jsquash/webp');
+  // The import above is nearly instant once the module is cached, but on a
+  // cold worker it still has to load the wasm codec — tick progress here so
+  // the bar visibly moves through that gap instead of looking frozen.
+  onProgress(0.6);
   const out = await encode(image, { quality: settings.quality.webp });
   return new Uint8Array(out);
 }
@@ -122,7 +130,7 @@ export async function encodeImage(
       bytes = await encodePng(image, settings, onProgress);
       break;
     case 'webp':
-      bytes = await encodeWebp(image, settings);
+      bytes = await encodeWebp(image, settings, onProgress);
       break;
     case 'jpeg':
       bytes = await encodeJpeg(image, settings);
@@ -135,4 +143,38 @@ export async function encodeImage(
   const recommendation =
     bytes.byteLength >= originalSize ? recommendSmaller(settings.format, sourceType) : undefined;
   return { bytes, size: bytes.byteLength, mime: meta.mime, ext: meta.ext, recommendation };
+}
+
+function dummyPixel(): ImageData {
+  return new ImageData(new Uint8ClampedArray([0, 0, 0, 255]), 1, 1);
+}
+
+/**
+ * Lazy-load and initialise a format's WASM codec on a 1x1 throwaway image,
+ * without doing a real encode. Call this as soon as a format becomes active
+ * so the cold-start cost (dynamic import + wasm fetch/compile/instantiate —
+ * worst for WebP, which also runs an async SIMD feature-detect) is paid
+ * ahead of time instead of during the user's first real conversion.
+ */
+export async function warmEncoder(format: OutputFormat): Promise<void> {
+  switch (format) {
+    case 'webp': {
+      const { encode } = await import('@jsquash/webp');
+      await encode(dummyPixel(), { quality: 1 });
+      return;
+    }
+    case 'jpeg': {
+      const { encode } = await import('@jsquash/jpeg');
+      await encode(dummyPixel(), { quality: 1 });
+      return;
+    }
+    case 'png': {
+      const UPNG = (await import('upng-js')).default;
+      const rgba = new Uint8Array(dummyPixel().data.buffer.slice(0)).buffer;
+      const png = UPNG.encode([rgba], 1, 1, 0);
+      const { optimise } = await import('@jsquash/oxipng');
+      await optimise(png, { level: 1 });
+      return;
+    }
+  }
 }

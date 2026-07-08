@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useQueueStore } from '../state/queueStore';
 import { triggerDownload } from '../lib/exports';
-import type { EncodeRequest, WorkerResponse } from '../core/types';
+import type { EncodeRequest, OutputFormat, WorkerRequest, WorkerResponse } from '../core/types';
 
 /**
  * How many images encode at once. UPNG (the lossy PNG step) is single-threaded
@@ -45,6 +45,7 @@ export function useQueueRunner() {
             ? { ...base, format: item.overrideFormat }
             : base;
           const req: EncodeRequest = {
+            type: 'encode',
             id,
             buffer,
             sourceType: item.file.type || 'image/png',
@@ -127,8 +128,28 @@ export function useQueueRunner() {
       slots.push(slot);
     }
 
-    // React to newly added items while any slot is idle.
-    const unsubscribe = store.subscribe(() => pump());
+    // Pre-load a format's WASM codec on every slot so the first real encode
+    // after picking that format isn't slowed down by a cold module load —
+    // worst for WebP, whose codec is bigger and needs an extra async
+    // SIMD feature-detect before it can even start loading.
+    const warmAll = (format: OutputFormat) => {
+      const req: WorkerRequest = { type: 'warm', format };
+      for (const slot of slots) slot.worker.postMessage(req);
+    };
+    let warmedFormat: OutputFormat | null = null;
+    const warmIfNeeded = (format: OutputFormat) => {
+      if (format === warmedFormat) return;
+      warmedFormat = format;
+      warmAll(format);
+    };
+    warmIfNeeded(store.getState().settings.format);
+
+    // React to newly added items while any slot is idle, and warm a newly
+    // selected format ahead of the first drop.
+    const unsubscribe = store.subscribe(() => {
+      pump();
+      warmIfNeeded(store.getState().settings.format);
+    });
     pump();
 
     return () => {

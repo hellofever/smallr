@@ -82,7 +82,7 @@ export function SettingsPanel() {
             <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
               PNG quality
             </label>
-            <div className="flex rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-1">
+            <div className="flex h-[42px] rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-1">
               {PNG_PRESETS.map((p) => (
                 <button
                   key={p.value}
@@ -138,19 +138,21 @@ function Slider({
         <label className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
           {label}
         </label>
-        <span className="text-sm font-medium text-[var(--text)]">
+        <span className="text-xs font-medium text-[var(--text)]">
           <span className="tabular-nums">{value}</span>
           <span className="text-[var(--muted)]"> · {range.label}</span>
         </span>
       </div>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="smallr-range w-full"
-      />
+      <div className="flex h-[42px] items-center rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-2.5 py-1">
+        <input
+          type="range"
+          min={min}
+          max={max}
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          className="smallr-range w-full"
+        />
+      </div>
       <p className="mt-1.5 text-xs text-[var(--muted)]">{range.caption}</p>
     </div>
   );
