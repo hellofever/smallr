@@ -97,7 +97,9 @@ function QueueItemRow({ item }: { item: Item }) {
             onClick={onCopy}
             aria-label={copied ? 'Copied' : 'Copy image'}
             title={copied ? 'Copied' : item.status === 'done' ? 'Copy result' : 'Copy original'}
-            className="grid h-12 w-12 place-items-center rounded-md border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] transition-colors hover:text-[var(--accent)]"
+            className={`grid h-12 w-12 place-items-center rounded-md border border-[var(--border)] bg-[var(--surface)] transition-colors ${
+              copied ? 'text-green-500' : 'text-[var(--muted)] hover:text-[var(--accent)]'
+            }`}
           >
             {copied ? <CheckIcon size={18} /> : <CopyIcon size={18} />}
           </button>
