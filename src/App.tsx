@@ -60,7 +60,7 @@ export default function App() {
         <>
           <section className="w-full border-t border-[var(--border)] bg-[var(--surface-2)]">
             <div className="mx-auto max-w-3xl px-5 py-16 text-center sm:py-20">
-              <h2 className="text-3xl font-bold tracking-tight text-[var(--text)] sm:text-5xl">
+              <h2 className="text-3xl font-bold leading-tight tracking-tight text-[var(--text)] sm:text-5xl">
                 Make things <span className="text-[var(--accent)]">smallr</span>.
                 <br />
                 All <span className="text-[var(--accent)]">locally</span>, all for{' '}
