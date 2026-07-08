@@ -35,6 +35,18 @@ loaded WASM/JS so each codec downloads only when first used:
 | WebP | [@jsquash/webp](https://github.com/jamsinclair/jSquash) | Apache-2.0 |
 | JPEG | [@jsquash/jpeg](https://github.com/jamsinclair/jSquash) (MozJPEG) | Apache-2.0 |
 
+**PNG** — `upng-js` encodes the raw pixels first: the `lossless` and `high` presets keep every pixel
+(full truecolour, no palette), while `medium`/`low` quantise the image down to a 256- or 64-colour
+palette — the actual lossy step. Either way, `oxipng` then re-compresses the resulting PNG
+losslessly (a higher effort level for the quantised presets), shrinking the file without touching a
+single pixel.
+
+**WebP** — the decoded pixels go straight into `@jsquash/webp`'s encoder at the quality (1–100) you
+choose — a single lossy encode pass, no extra steps.
+
+**JPEG** — JPEG has no alpha channel, so any transparent pixels are first flattened onto a white
+background; the result is then encoded by `@jsquash/jpeg` (MozJPEG) at the chosen quality.
+
 The compression logic lives in `src/core/` with no framework dependencies, so it can be reused by a
 future desktop/clipboard app. See [`CLAUDE.md`](./CLAUDE.md) for architecture details.
 

@@ -25,12 +25,12 @@
 /* Semantic tokens — light theme (default). */
 :root,
 [data-theme='light'] {
-  --bg: #f5fafc;
+  --bg: #f7f7f8;
   --surface: #ffffff;
-  --surface-2: #eef6fa;
-  --border: #d7e6ee;
-  --text: #03045e;
-  --muted: #5b6b82;
+  --surface-2: #f0f1f3;
+  --border: #e2e4e8;
+  --text: #16181d;
+  --muted: #6b7280;
   --accent: #0077b6;
   --accent-strong: #023e8a;
   --accent-contrast: #ffffff;
@@ -39,17 +39,17 @@
   --success: #0096c7;
   --danger: #b4432f;
   --warning: #b45309;
-  --shadow: 0 1px 2px rgba(3, 4, 94, 0.06), 0 8px 24px rgba(3, 4, 94, 0.06);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
 /* Semantic tokens — dark theme. */
 [data-theme='dark'] {
-  --bg: #030525;
-  --surface: #0a0f3a;
-  --surface-2: #0e1550;
-  --border: #1b2570;
-  --text: #caf0f8;
-  --muted: #8fa6c9;
+  --bg: #0a0a0c;
+  --surface: #141518;
+  --surface-2: #1b1c20;
+  --border: #2b2c31;
+  --text: #eceef0;
+  --muted: #989ba3;
   --accent: #48cae4;
   --accent-strong: #90e0ef;
   --accent-contrast: #03045e;

@@ -14,7 +14,7 @@ export function Composer() {
   if (phase === 'done' || phase === 'failed') return null;
 
   return (
-    <section className="space-y-4 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] p-3 shadow-[var(--shadow)]">
+    <section className="my-6 space-y-4 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] px-3 py-6 shadow-[var(--shadow)]">
       <SettingsPanel />
       <Dropzone />
       <AutoDownloadToggle />

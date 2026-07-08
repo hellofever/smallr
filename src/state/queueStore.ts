@@ -71,10 +71,32 @@ function loadAutoDownload(): boolean {
   }
 }
 
+const SETTINGS_KEY = 'smallr:settings';
+function loadSettings(): EncodeSettings | null {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (!raw) return null;
+    return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+  } catch {
+    return null;
+  }
+}
+function saveSettings(settings: EncodeSettings) {
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  } catch {
+    /* storage may be unavailable (private mode); keep it in-memory */
+  }
+}
+
+const savedSettings = loadSettings();
+
 export const useQueueStore = create<QueueState>((set) => ({
   items: [],
-  settings: DEFAULT_SETTINGS,
-  formatTouched: false,
+  settings: savedSettings ?? DEFAULT_SETTINGS,
+  // A restored explicit choice must not be overwritten by the first-drop
+  // auto-match (see `addFiles`) the way a fresh, never-touched default would be.
+  formatTouched: savedSettings != null,
   autoDownload: loadAutoDownload(),
 
   setAutoDownload: (value) =>
@@ -138,15 +160,26 @@ export const useQueueStore = create<QueueState>((set) => ({
     }),
 
   setFormat: (format) =>
-    set((state) => ({ settings: { ...state.settings, format }, formatTouched: true })),
+    set((state) => {
+      const settings = { ...state.settings, format };
+      saveSettings(settings);
+      return { settings, formatTouched: true };
+    }),
   setQuality: (quality) =>
-    set((state) => ({
-      settings: {
+    set((state) => {
+      const settings = {
         ...state.settings,
         quality: { ...state.settings.quality, [state.settings.format]: quality },
-      },
-    })),
-  setPngPreset: (pngPreset) => set((state) => ({ settings: { ...state.settings, pngPreset } })),
+      };
+      saveSettings(settings);
+      return { settings };
+    }),
+  setPngPreset: (pngPreset) =>
+    set((state) => {
+      const settings = { ...state.settings, pngPreset };
+      saveSettings(settings);
+      return { settings };
+    }),
 
   requeueAs: (id, format) =>
     set((state) => ({

@@ -61,12 +61,16 @@ export default function App() {
           <section className="w-full border-t border-[var(--border)] bg-[var(--surface-2)]">
             <div className="mx-auto max-w-3xl px-5 py-16 text-center sm:py-20">
               <h2 className="text-3xl font-bold tracking-tight text-[var(--text)] sm:text-5xl">
-                Make things smaller, all locally, all for free.
+                Make things <span className="text-[var(--accent)]">smallr</span>.
+                <br />
+                All <span className="text-[var(--accent)]">locally</span>, all for{' '}
+                <span className="text-[var(--accent)]">free</span>.
               </h2>
               <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-[var(--muted)] sm:text-lg">
-                smallr is a fast, minimal image compressor and converter that runs entirely in your
-                browser. Nothing is ever uploaded — your files never leave your device — so it stays
-                completely private, works offline, and is free forever.
+                <span className="text-[var(--accent)]">smallr</span> is a fast, minimal image
+                compressor and converter that runs entirely in your browser. Nothing is ever
+                uploaded — your files never leave your device — so it stays completely private,
+                works offline, and is <span className="text-[var(--accent)]">free</span>.
               </p>
             </div>
           </section>
