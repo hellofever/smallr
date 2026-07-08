@@ -15,8 +15,8 @@ export function Composer() {
 
   return (
     <section className="space-y-4 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] p-3 shadow-[var(--shadow)]">
-      <Dropzone />
       <SettingsPanel />
+      <Dropzone />
       <AutoDownloadToggle />
     </section>
   );

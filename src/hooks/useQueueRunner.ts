@@ -4,12 +4,13 @@ import { triggerDownload } from '../lib/exports';
 import type { EncodeRequest, WorkerResponse } from '../core/types';
 
 /**
- * How many images encode at once. Kept deliberately small: UPNG (the lossy PNG
- * step) is single-threaded pure JS, so parallelism across items is the only way
- * to use more than one core — but each in-flight item holds a full decoded
- * ImageData, so we cap peak memory rather than grabbing every core.
+ * How many images encode at once. UPNG (the lossy PNG step) is single-threaded
+ * pure JS, so parallelism across items is the only way to use more than one
+ * core — but each in-flight item holds a full decoded ImageData, so we leave
+ * one core free for the UI thread and cap the rest rather than grabbing every
+ * core (which would also cap peak memory use on many-core machines).
  */
-const POOL_SIZE = Math.max(1, Math.min(navigator.hardwareConcurrency || 1, 2));
+const POOL_SIZE = Math.max(1, Math.min((navigator.hardwareConcurrency || 1) - 1, 4));
 
 interface Slot {
   worker: Worker;

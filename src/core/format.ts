@@ -43,6 +43,12 @@ export function renameWithExt(name: string, ext: string): string {
   return `${base}.${ext}`;
 }
 
+/** A filename's extension, upper-cased for display, e.g. "photo.jpg" → "JPG". */
+export function extLabel(name: string): string {
+  const dot = name.lastIndexOf('.');
+  return dot > 0 ? name.slice(dot + 1).toUpperCase() : '';
+}
+
 /** Map an input MIME type to a matching output format, if we support it. */
 export function mimeToFormat(mime: string): OutputFormat | null {
   switch (mime) {

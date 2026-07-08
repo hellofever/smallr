@@ -27,6 +27,8 @@ export interface QueueItem {
 interface QueueState {
   items: QueueItem[];
   settings: EncodeSettings;
+  /** Set once the user explicitly picks a format, so a later drop never clobbers it. */
+  formatTouched: boolean;
   /** When on, each finished output is auto-saved to the browser's downloads. */
   autoDownload: boolean;
   setAutoDownload: (value: boolean) => void;
@@ -72,6 +74,7 @@ function loadAutoDownload(): boolean {
 export const useQueueStore = create<QueueState>((set) => ({
   items: [],
   settings: DEFAULT_SETTINGS,
+  formatTouched: false,
   autoDownload: loadAutoDownload(),
 
   setAutoDownload: (value) =>
@@ -88,9 +91,12 @@ export const useQueueStore = create<QueueState>((set) => ({
     set((state) => {
       // Auto-select the output format to match the (first) dropped/pasted image,
       // so the default action is "optimise in place". Unknown types keep current.
-      // Only for the first batch: once a run is underway the settings are locked,
-      // so dropping more images must not change the format mid-flight.
-      const matched = state.items.length === 0 && files[0] ? mimeToFormat(files[0].type) : null;
+      // Only for the first batch, and only if the user hasn't explicitly chosen a
+      // format themselves — once they have, respect it instead of overriding it.
+      const matched =
+        state.items.length === 0 && !state.formatTouched && files[0]
+          ? mimeToFormat(files[0].type)
+          : null;
       return {
         settings: matched ? { ...state.settings, format: matched } : state.settings,
         items: [
@@ -131,7 +137,8 @@ export const useQueueStore = create<QueueState>((set) => ({
       return { items: keep };
     }),
 
-  setFormat: (format) => set((state) => ({ settings: { ...state.settings, format } })),
+  setFormat: (format) =>
+    set((state) => ({ settings: { ...state.settings, format }, formatTouched: true })),
   setQuality: (quality) =>
     set((state) => ({
       settings: {

@@ -1,7 +1,7 @@
 import { memo, useState } from 'react';
 import type { QueueItem as Item } from '../state/queueStore';
 import { useQueueStore } from '../state/queueStore';
-import { formatBytes, percentSaved, FORMAT_META } from '../core/format';
+import { formatBytes, percentSaved, extLabel, FORMAT_META } from '../core/format';
 import { copyImageToClipboard } from '../lib/exports';
 import { CopyIcon, CheckIcon, DownloadIcon, Trash2Icon, AlertTriangleIcon, RotateCwIcon } from './icons';
 
@@ -53,8 +53,9 @@ function QueueItemRow({ item }: { item: Item }) {
         </div>
 
         <div className="mt-0.5 text-xs text-[var(--muted)]">
-          {item.status === 'done' && item.outputSize != null ? (
+          {item.status === 'done' && item.outputSize != null && item.outputName ? (
             <span className="tabular-nums">
+              {extLabel(item.name)} → {extLabel(item.outputName)} ·{' '}
               {formatBytes(item.originalSize)} → {formatBytes(item.outputSize)}
             </span>
           ) : item.status === 'error' ? (
@@ -90,15 +91,17 @@ function QueueItemRow({ item }: { item: Item }) {
       {/* Trailing action / status */}
       <div className="flex shrink-0 items-center gap-2">
         {(item.status === 'queued' || item.status === 'processing') && <Spinner />}
-        <button
-          type="button"
-          onClick={onCopy}
-          aria-label={copied ? 'Copied' : 'Copy image'}
-          title={copied ? 'Copied' : item.status === 'done' ? 'Copy result' : 'Copy original'}
-          className="grid h-12 w-12 place-items-center rounded-md border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] transition-colors hover:text-[var(--accent)]"
-        >
-          {copied ? <CheckIcon size={18} /> : <CopyIcon size={18} />}
-        </button>
+        {item.status !== 'processing' && (
+          <button
+            type="button"
+            onClick={onCopy}
+            aria-label={copied ? 'Copied' : 'Copy image'}
+            title={copied ? 'Copied' : item.status === 'done' ? 'Copy result' : 'Copy original'}
+            className="grid h-12 w-12 place-items-center rounded-md border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] transition-colors hover:text-[var(--accent)]"
+          >
+            {copied ? <CheckIcon size={18} /> : <CopyIcon size={18} />}
+          </button>
+        )}
         {item.status === 'error' && (
           <button
             type="button"

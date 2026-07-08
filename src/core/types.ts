@@ -28,11 +28,11 @@ export interface EncodeSettings {
  * Recommended defaults — retain quality while cutting file size:
  * - PNG: `high` (full 256-colour palette) — avoids the large lossless size with
  *   near-invisible loss. `lossless` remains available for zero-loss output.
- * - WebP / JPEG: 82 — the near-transparent sweet spot for both codecs.
+ * - WebP / JPEG: 80 — the near-transparent sweet spot for both codecs.
  */
 export const DEFAULT_SETTINGS: EncodeSettings = {
   format: 'png',
-  quality: { png: 90, webp: 82, jpeg: 82 },
+  quality: { png: 90, webp: 80, jpeg: 80 },
   pngPreset: 'high',
 };
 
