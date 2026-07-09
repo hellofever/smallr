@@ -62,11 +62,12 @@ async function encodePng(
   const { cnum, oxipng } = PNG_PRESETS[settings.pngPreset];
 
   // UPNG encodes the pixels: cnum=0 → truecolour lossless, cnum>0 → the palette
-  // quantisation (the lossy step). This runs on every path.
+  // quantisation (the lossy step). This runs on every path. `image` isn't read
+  // again afterwards, so UPNG can take the pixel buffer directly — no need to
+  // defensively copy it first (a real cost for large photos).
   const UPNG = (await import('upng-js')).default;
   onProgress(0.55);
-  const rgba = new Uint8Array(image.data.buffer.slice(0)).buffer;
-  const png = UPNG.encode([rgba], image.width, image.height, cnum);
+  const png = UPNG.encode([image.data.buffer], image.width, image.height, cnum);
 
   // oxipng then losslessly squeezes the container (smaller, same pixels). Skip
   // it when the preset opts out (oxipng === false).
@@ -170,8 +171,7 @@ export async function warmEncoder(format: OutputFormat): Promise<void> {
     }
     case 'png': {
       const UPNG = (await import('upng-js')).default;
-      const rgba = new Uint8Array(dummyPixel().data.buffer.slice(0)).buffer;
-      const png = UPNG.encode([rgba], 1, 1, 0);
+      const png = UPNG.encode([dummyPixel().data.buffer], 1, 1, 0);
       const { optimise } = await import('@jsquash/oxipng');
       await optimise(png, { level: 1 });
       return;
