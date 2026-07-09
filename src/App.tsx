@@ -6,6 +6,7 @@ import { ProgressBar } from './components/ProgressBar';
 import { QueueList } from './components/QueueList';
 import { ThemeToggle } from './components/ThemeToggle';
 import { CheckIcon } from './components/icons';
+import logoUrl from './assets/logo.svg';
 
 /** Open-source image libraries powering the pipeline — shown in the info blade. */
 const LIBRARIES: { name: string; text: string }[] = [
@@ -42,9 +43,12 @@ export default function App() {
       {/* The tool — centered column */}
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 py-8">
         <header className="flex items-center justify-between">
-          <div className="flex items-baseline gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-[var(--text)]">smallr</h1>
-            <span className="text-sm text-[var(--muted)]">local image compressor</span>
+          <div className="flex items-center gap-2.5">
+            <img src={logoUrl} alt="" className="h-7 w-7 shrink-0" />
+            <div className="flex items-baseline gap-2">
+              <h1 className="text-2xl font-bold tracking-tight text-[var(--text)]">smallr</h1>
+              <span className="text-sm text-[var(--muted)]">local image compressor</span>
+            </div>
           </div>
           <ThemeToggle />
         </header>
@@ -62,7 +66,12 @@ export default function App() {
         <>
           <section className="w-full border-t border-[var(--border)] bg-[var(--surface-2)]">
             <div className="mx-auto max-w-3xl px-5 py-16 text-center sm:py-20">
-              <h2 className="text-3xl font-bold leading-tight tracking-tight text-[var(--text)] sm:text-5xl">
+              <img
+                src={logoUrl}
+                alt=""
+                className="mx-auto h-32 w-32 rounded-[24px] shadow-[var(--shadow)]"
+              />
+              <h2 className="mt-5 text-3xl font-bold leading-tight tracking-tight text-[var(--text)] sm:text-5xl">
                 Make things <span className="text-[var(--accent)]">smallr</span>.
                 <br />
                 All <span className="text-[var(--accent)]">locally</span>, all for{' '}
